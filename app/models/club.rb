@@ -1,4 +1,5 @@
 class Club < ApplicationRecord
+  before_commit :players_average_age, only: [:show]
   has_one_attached :logo
 
   has_many :home_matches, class_name: "Match", foreign_key: "home_team_id"
@@ -29,33 +30,38 @@ class Club < ApplicationRecord
   end
 
   def win_on(year)
-    year = Date.new(year, 1, 1)
-    count = 0
-    matches.where(kicked_off_at: year.all_year).each do |match|
-      count += 1 if won?(match)
-    end
-    count
+    commun(year,1)
   end
 
   def lost_on(year)
-    year = Date.new(year, 1, 1)
-    count = 0
-    matches.where(kicked_off_at: year.all_year).each do |match|
-      count += 1 if lost?(match)
-    end
-    count
+    commun(year,2)
   end
 
   def draw_on(year)
-    year = Date.new(year, 1, 1)
-    count = 0
-    matches.where(kicked_off_at: year.all_year).each do |match|
-      count += 1 if draw?(match)
+    commun(year,3)
+  end
+  [:won?, :lost?, :draw?]
+  #def homebase
+  #  "#{hometown}, #{country}"
+  #end
+  def players_average_age
+    (self.players.sum(&:age) / self.players.length).to_f
+  end
+  private
+    def commun(year,i)
+      note ="draw?"
+      year = Date.new(year, 1, 1)
+      count = 0
+      matches.where(kicked_off_at: year.all_year).each do |match|
+        if i == 1
+          count += 1 if won?(match)
+        elsif i == 2
+          count += 1 if lost?(match)
+        elsif i == 3
+          count += 1 if draw?(match)
+        end
+      end
+      count
     end
-    count
-  end
-
-  def homebase
-    "#{hometown}, #{country}"
-  end
+  
 end

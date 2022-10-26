@@ -1,5 +1,6 @@
 class ClubsController < ApplicationController
   before_action :set_club, only: [:show, :edit, :update, :destroy]
+  #before_action :players_average_age, only: [:show]
 
   # GET /clubs
   # GET /clubs.json
@@ -10,7 +11,8 @@ class ClubsController < ApplicationController
   # GET /clubs/1
   # GET /clubs/1.json
   def show
-    @players_average_age = (@club.players.sum(&:age) / @club.players.length).to_f
+   # @players_average_age = (@club.players.sum(&:age) / @club.players.length).to_f
+    @players_average_age = @club.players_average_age
   end
 
   # GET /clubs/new
