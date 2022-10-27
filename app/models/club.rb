@@ -45,7 +45,9 @@ class Club < ApplicationRecord
   #  "#{hometown}, #{country}"
   #end
   def players_average_age
-    (self.players.sum(&:age) / self.players.length).to_f
+    if self.players.length != 0
+      (self.players.sum(&:age) / self.players.length).to_f
+    end
   end
   private
     def commun(year,i)

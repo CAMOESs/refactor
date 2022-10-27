@@ -6,7 +6,7 @@ class League < ApplicationRecord
   has_many :clubs
 
   def table_rows(year=Time.current.year)
-    rows = clubs.map { |club| Poros::LeagueTableRow.new(club, year).prepare_row }
+    rows = clubs.map { |club| Poros::LeagueTableRow.new(club, year).point}
 
     ranked_rows_by_points = rank_rows(rows)
     rank_rows_have_the_same_points(ranked_rows_by_points)
@@ -21,6 +21,19 @@ class League < ApplicationRecord
   def rank_rows(rows)
     rows_desc_sorted_by_points = rows.sort_by { |club| club.points }.reverse
     rows_desc_sorted_by_points.each { |row| row.rank = rows_desc_sorted_by_points.index(row) + 1 }
+  end
+
+  def prepare_row(club, year)
+     
+    digested_games_count = Poros::LeagueTableRow.new(club, year).matches.where(kicked_off_at: Date.new(year, 1, 1)...Time.current).count
+    win = club.win_on(year)
+    lost = club.lost_on(year)
+    draw = club.draw_on(year)
+    goals = matches.sum {|match| match.goal_by(club) }
+    goals_conceded = matches.sum {|match| match.goal_conceded_by(club) }
+    goal_difference = goals - goals_conceded
+    points = win * WIN_POINTS + draw * DRAW_POINTS
+    self
   end
 
   def rank_rows_have_the_same_points(rows)
